@@ -129,6 +129,11 @@ def handle_command(command):
     # Self-connections and duplicate connections should be flagged with suitable error messages.
 
     if user_cmd == "connect":
+        # error check
+        if len(user_input) != 3:
+            print("Usage: connect <destination> <port no>")
+            return
+        
         # create socket
         sock = socket.socket()
         sock.connect((user_input[1], int(user_input[2])))
