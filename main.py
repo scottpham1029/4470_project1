@@ -76,7 +76,35 @@ def listen_to_peer(sock, addr, port):
         print(f"\nPeer disconnected: {addr}")
 
 
+#1. help command 
+# Print out list of commands to control in our terminal 
+def help_command():
+    print("\n" + "=" * 70)
+    print("\t\t\t\tCOMMANDS")
+    print("=" * 70)
+          
+    print("The following  are the commands that can be"
+          " used on line text with their use case:\n")
 
+    print("help : \n\tShows all the commands.")
+    
+    print("myip :\n\tShows what yuour local IP is (not 127.0.0.1).")
+    
+    print("myport :\n\tShows which port is being listened to")
+    
+    print("connect <destubation> <port no> :\n\t\tTries to  establishes new"
+          " TCP connection to a local IP")
+    
+    print("list :\n\tPrints out all connected IP address and what port each is listening to.")
+    
+    print("terminate <connection id> :\n\t\tterminates a connection based on the ID placed on them.")
+    
+    print("send <connection id> :\n\t\tSend a message to ones ID as well as a confirmation if message sent.")
+    
+    print("exit :\n\tExit from program.")
+
+    print("\n" + "=" * 70)
+    
 def handle_command(command):
     # store user input
     user_input = command.split(maxsplit=2)
@@ -156,6 +184,9 @@ def handle_command(command):
 
         print("Exiting chat application.")
         return False
+
+    elif user_cmd == "help":
+        help_command()
 
 
 def main():
