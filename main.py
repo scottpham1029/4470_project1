@@ -125,6 +125,35 @@ def help_command():
     print("exit :\n\tExit from program.")
 
     print("\n" + "=" * 70)
+
+def myip_command():
+
+    #FOR CLEAN UP
+    #can also just call for: 
+    #print(global_my_ip)
+    
+    hostname = socket.gethostname()
+    
+    try: 
+        #list of 5 family,type,protocol,canonname, sockaddr
+        addresses = socket.getaddrinfo(hostname, None, socket.AF_INET)
+
+        
+        for address in addresses:
+            #5th give us sockaddr
+            #1st item in sockaddr is our IP
+            ip = address[4][0]
+
+            #ignore localhost address 
+            if not ip.startswith("127."):
+                print(f"Local IP: {ip}.")
+                return
+            else: 
+                print("Could not find loccal IP address." )
+
+    #error message instead of a crash
+    except socket.gaierror:
+        print("Could not find local IP address.")
     
 def handle_command(command):
     # store user input
@@ -263,6 +292,9 @@ def handle_command(command):
 
     elif user_cmd == "help":
         help_command()
+
+    elif user_cmd == "myip":
+        myip_command()
 
 
 def main():
