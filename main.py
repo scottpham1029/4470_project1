@@ -12,9 +12,9 @@ def listen_for_connect(s):
         connection_socket, address = s.accept()
 
         # add connection to list
-        connections.append({"socket": connection_socket, "address": address[0], "port": address[1]})
+        connections.append({"socket": connection_socket, "address": address[0], "port": int(address[1])})
 
-        thread = threading.Thread(target=listen_to_peer, args=(connection_socket, address[0], address[1]), daemon=True)
+        thread = threading.Thread(target=listen_to_peer, args=(connection_socket, address[0], int(address[1])), daemon=True)
         thread.start()
 
 def remove_connection(sock):
@@ -139,9 +139,9 @@ def handle_command(command):
         sock.connect((user_input[1], int(user_input[2])))
 
         # add connection to list
-        connections.append({"socket": sock, "address": user_input[1], "port": user_input[2]})
+        connections.append({"socket": sock, "address": user_input[1], "port": int(user_input[2])})
 
-        thread = threading.Thread(target=listen_to_peer, args=(sock, user_input[1], user_input[2]), daemon=True)
+        thread = threading.Thread(target=listen_to_peer, args=(sock, user_input[1], int(user_input[2])), daemon=True)
         thread.start()
     elif user_cmd == "send":
 
