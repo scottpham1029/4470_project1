@@ -9,7 +9,10 @@ connections = []
 
 def listen_for_connect(s):
     while True:
-        connection_socket, address = s.accept()
+        try:
+            connection_socket, address = s.accept()
+        except OSError:
+            break
 
         # add connection to list
         connections.append({"socket": connection_socket, "address": address[0], "port": int(address[1])})
@@ -61,9 +64,15 @@ def listen_to_peer(sock, addr, port):
                     message = packet["message"]
                     sender_port = packet["port"]
 
-                    print(f"\nMessage receved from {addr}")
-                    print(f"Sender's port: {sender_port}")
-                    print(f'Message: "{message}"')
+                    if message == "INIT_LISTEN_PACKET":
+                        for peer in connections:
+                            if peer["socket"] is sock:
+                                peer["port"] = sender_port
+                                break
+                    else :
+                        print(f"\nMessage receved from {addr}")
+                        print(f"Sender's port: {sender_port}")
+                        print(f'Message: "{message}"')
 
                 except(ValueError, TypeError, KeyError):
                     print("Error: Invalid Message Received")
@@ -75,6 +84,18 @@ def listen_to_peer(sock, addr, port):
         remove_connection(sock)
         print(f"\nPeer disconnected: {addr}")
 
+def get_my_ip():
+    temp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    try:
+        temp.connect(("8.8.8.8", 80))
+        ip = temp.getsockname()[0]
+    finally:
+        temp.close()
+
+    return ip
+
+global_my_ip = get_my_ip()
 
 #1. help command 
 # Print out list of commands to control in our terminal 
@@ -133,16 +154,66 @@ def handle_command(command):
         if len(user_input) != 3:
             print("Usage: connect <destination> <port no>")
             return
+
         
+        try:
+            destination = user_input[1]
+            destination_port = int(user_input[2])
+
+        except ValueError:
+            print("Error: port must be an integer")
+            return
+
+        if destination == global_my_ip and destination_port == int(sys.argv[1]):
+            print("Error: Cannot connect to self")
+            return
+        
+        for peer in connections:
+            if peer["address"] == destination and peer["port"] == destination_port:
+                print("Error: Already connected to this peer")
+                return
+
+            
         # create socket
         sock = socket.socket()
-        sock.connect((user_input[1], int(user_input[2])))
+
+        try:
+            sock.connect((destination, destination_port))
+
+        except (OSError) as e:
+            print(f"Connection failed: {e}")
+            sock.close()
+            return
 
         # add connection to list
         connections.append({"socket": sock, "address": user_input[1], "port": int(user_input[2])})
 
+        # tell the peer what port WE are listening on
+        init_packet = {
+            "message": "INIT_LISTEN_PACKET",
+            "port": int(sys.argv[1])
+        }
+
+        # send da packet
+        data = json.dumps(init_packet) + "\n"
+        sock.sendall(data.encode("utf-8"))
+
         thread = threading.Thread(target=listen_to_peer, args=(sock, user_input[1], int(user_input[2])), daemon=True)
         thread.start()
+
+        print(f"Successfully connected to {destination}:{destination_port}")
+    elif user_cmd == "list":
+
+        if len(connections) == 0:
+            print("No active connections.")
+            return
+
+        print("id: IP address\tPort No.")
+
+        for i, peer in enumerate(connections, start=1):
+            print(f"{i}: {peer['address']}\t{peer['port']}")
+
+        
     elif user_cmd == "send":
 
         if len(user_input) != 3:
@@ -195,6 +266,7 @@ def handle_command(command):
 
 
 def main():
+    
     # listening socket
     s = socket.socket()
 
@@ -215,9 +287,11 @@ def main():
     #     # look for user input
     #     command = input(">>> ")
     #     handle_command(command)
-
+    print("\nWelcome to the chat application!\n--------------------------------")
+    print("\nEnter a command (type 'help' for a list of commands):")
     try:
         while True:
+            
             command = input(">>> ")
 
             if handle_command(command) is False:
