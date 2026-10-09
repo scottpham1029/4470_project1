@@ -1,0 +1,38 @@
+scottpham1029@GadgetronMac4000 4470_assignment1 % python main.py 5052
+
+Welcome to the chat application!
+--------------------------------
+
+Enter a command (type 'help' for a list of commands):
+>>>    
+Connection accepted from 192.168.1.142:52566
+Total connections: 1
+list
+id: IP address	Port No.
+1: 192.168.1.142	5050
+>>> 
+Connection accepted from 192.168.1.142:52571
+Total connections: 2
+list
+id: IP address	Port No.
+1: 192.168.1.142	5050
+2: 192.168.1.142	5051
+>>> 
+Message receved from 192.168.1.142
+Sender's port: 5050
+Message: "50->52 test"
+list
+id: IP address	Port No.
+1: 192.168.1.142	5050
+2: 192.168.1.142	5051
+>>> 
+Peer disconnected: 192.168.1.142
+list
+id: IP address	Port No.
+1: 192.168.1.142	5050
+>>> exit
+Closing all connections...
+
+Peer disconnected: 192.168.1.142
+Exiting chat application.
+scottpham1029@GadgetronMac4000 4470_assignment1 %

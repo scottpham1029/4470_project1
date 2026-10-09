@@ -1,0 +1,82 @@
+scottpham1029@GadgetronMac4000 4470_assignment1 % python main.py 5050
+
+Welcome to the chat application!
+--------------------------------
+
+Enter a command (type 'help' for a list of commands):
+>>> help
+
+======================================================================
+				COMMANDS
+======================================================================
+The following  are the commands that can be used on line text with their use case:
+
+help : 
+	Shows all the commands.
+myip :
+	Display the IP address of this process.
+myport :
+	Displays the port on which this process is listening for incoming connections.
+connect <destubation> <port no> :
+		Tries to  establishes new TCP connection to a local IP
+list :
+	Prints out all connected IP address and what port each is listening to.
+terminate <connection id> :
+		terminates a connection based on the ID placed on them.
+send <connection id> :
+		Send a message to ones ID as well as a confirmation if message sent.
+exit :
+	Exit from program.
+
+======================================================================
+>>> myip
+192.168.1.142
+>>> myport
+Listening port: 5050
+>>> list
+No active connections.
+>>> terminate
+No active connections.
+>>> send 
+Usage: send <connection id> <message>
+>>> send 1 
+Usage: send <connection id> <message>
+>>> send 1 slfjsf
+Connection does not exist
+>>> connect 192.168.1.142 5051
+Successfully connected to 192.168.1.142:5051
+>>> connect 192.168.1.142 5050
+Error: Cannot connect to self
+>>> 192.168.1.142 5052
+>>> connect 192.168.1.142 5051
+Error: Already connected to this peer
+>>> connect 192.168.1.142 5052
+Successfully connected to 192.168.1.142:5052
+>>> list
+id: IP address	Port No.
+1: 192.168.1.142	5051
+2: 192.168.1.142	5052
+>>> send 1 50->51 test
+Message sent to 1
+>>> send 0 nonexistent id message test
+Connection does not exist
+>>> send 2 50->52 test
+Message sent to 2
+>>> 
+Message receved from 192.168.1.142
+Sender's port: 5051
+Message: "51->50 test"
+
+Peer disconnected: 192.168.1.142
+
+Peer disconnected: 192.168.1.142
+list
+No active connections.
+>>> myip
+192.168.1.142
+>>> myport
+Listening port: 5050
+>>> exit
+Closing all connections...
+Exiting chat application.
+scottpham1029@GadgetronMac4000 4470_assignment1 % 
