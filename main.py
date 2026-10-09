@@ -149,6 +149,10 @@ def help_command():
 
 def myip_command():
     print(global_my_ip)
+
+def myport_command():
+    port = int(sys.argv[1])
+    print(f"Listening port: {port}")
     
 def handle_command(command):
     # store user input
@@ -269,6 +273,36 @@ def handle_command(command):
         except OSError as e:
             print(f"Error sending message: {e}")
 
+    elif user_cmd == "terminate":
+        if len(connections) == 0:
+            print("No active connections.")
+            return
+        else:
+            if len(user_input) != 2:
+                print("Usage: terminate <connection id> ")
+                return
+            else:
+                try:
+                    connection_id = int(user_input[1])
+                except ValueError:
+                    print("Invalid connection ID.")
+                    return
+
+                #check whether connection ID exists
+                if not 1 <= connection_id <= len(connections):
+                    print("Connection does not exist.")
+                    return
+
+                #retrieve peer from connections list
+                peer = connections[connection_id - 1]
+
+                #remove connection using its socket
+                remove_connection(peer["socket"])
+
+                print(f"Connection {connection_id} terminated.")
+
+        
+
     elif user_cmd == "exit":
         print("Closing all connections...")
 
@@ -284,6 +318,10 @@ def handle_command(command):
 
     elif user_cmd == "myip":
         myip_command()
+
+    elif user_cmd == "myport":
+        myport_command()
+
 
 
 def main():
