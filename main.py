@@ -2,40 +2,41 @@ import socket
 import threading
 import json
 import sys
+import errno
 
-
-# store connections
+#store connections
 connections = []  
 
+#establish connection
 def listen_for_connect(s):
 
-    print("[DEBUG] Listening for incoming TCP connections...")
-    
+    #test connection
     while True:
         try:
             connection_socket, address = s.accept()
         except OSError:
             break
 
-        print(f"\n[DEBUG] Connection accepted from {address}")
-        print(f"[DEBUG] Socket: {connection_socket}")
+        print(f"\nConnection accepted from {address[0]}:{address[1]}")
 
-        # add connection to list
+        #add connection to list
         connections.append({"socket": connection_socket, "address": address[0], "port": int(address[1])})
 
-        print(f"[DEBUG] Total connections: {len(connections)}")
+        #print connection confirmation
+        print(f"Total connections: {len(connections)}")
 
+        #instantiate thread
         thread = threading.Thread(target=listen_to_peer, args=(connection_socket, address[0], int(address[1])), daemon=True)
         thread.start()
 
 def remove_connection(sock):
-    # Find and remove the connection
+    #find and remove the connection
     for peer in connections[:]:
         if peer["socket"] is sock:
             connections.remove(peer)
             break
 
-    # Close the socket
+    #close the socket
     try:
         sock.shutdown(socket.SHUT_RDWR)
     except OSError:
@@ -43,6 +44,7 @@ def remove_connection(sock):
 
     sock.close()
 
+#main communication function between threads
 def listen_to_peer(sock, addr, port):
 
     #byte literal
@@ -53,6 +55,7 @@ def listen_to_peer(sock, addr, port):
             #receive data from connected peer
             data = sock.recv(1024)
 
+            #for empty message data
             if not data:
                 break
 
@@ -66,6 +69,7 @@ def listen_to_peer(sock, addr, port):
                 #remainder in buffer
                 line, buffer = buffer.split(b"\n", 1)
 
+                #formatting string -> byte
                 try:
                     packet = json.loads(line.decode("utf-8"))
 
@@ -85,19 +89,18 @@ def listen_to_peer(sock, addr, port):
                 except(ValueError, TypeError, KeyError):
                     print("Error: Invalid Message Received")
 
+    #voids a specific error message when a process 
+    #terminates another process intentionally
     except OSError as e:
-        print(f"Connection error with {addr}: {e}")
+        if e.errno != errno.EBADF:
+            print(f"Connection error with {addr}: {e}")
 
     finally:
         remove_connection(sock)
         print(f"\nPeer disconnected: {addr}")
 
 
-'''
-def get_my_ip()
-----------------
-returns ip address
-'''
+#returns ip address
 def get_my_ip():
     temp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -115,11 +118,7 @@ def get_my_ip():
 
 global_my_ip = get_my_ip()
 
-'''
-def help_command():
---------------------
-prints out list of commands 
-'''
+#prints set of commands; imitates man_command
 def help_command():
     print("\n" + "=" * 70)
     print("\t\t\t\tCOMMANDS")
@@ -128,43 +127,45 @@ def help_command():
     print("The following  are the commands that can be"
           " used on line text with their use case:\n")
 
-    print("help : \n\tShows all the commands.") #DONE
+    print("help : \n\tShows all the commands.")
     
     print("myip :\n\tDisplay the IP address of this process.")
     
     print("myport :\n\tDisplays the port on which this process is listening for incoming connections.")
     
     print("connect <destubation> <port no> :\n\t\tTries to  establishes new"
-          " TCP connection to a local IP") #DONE
+          " TCP connection to a local IP")
     
-    print("list :\n\tPrints out all connected IP address and what port each is listening to.") #DONE
+    print("list :\n\tPrints out all connected IP address and what port each is listening to.")
     
     print("terminate <connection id> :\n\t\tterminates a connection based on the ID placed on them.")
     
-    print("send <connection id> :\n\t\tSend a message to ones ID as well as a confirmation if message sent.") #DONE
+    print("send <connection id> :\n\t\tSend a message to ones ID as well as a confirmation if message sent.")
     
-    print("exit :\n\tExit from program.") #DONE
+    print("exit :\n\tExit from program.")
 
     print("\n" + "=" * 70)
 
+#prints ip for active thread
 def myip_command():
     print(global_my_ip)
 
+#prints port for active thread
 def myport_command():
     port = int(sys.argv[1])
     print(f"Listening port: {port}")
-    
+
+#handles logic for command novigation and process
 def handle_command(command):
-    # store user input
+    #store user input
     user_input = command.split(maxsplit=2)
 
+    #empty prompt
     if len(user_input) == 0:
         return
 
-    # extract command and normalize string
+    #extract command and normalize string
     user_cmd = user_input[0].lower()
-
-    # connect <destination> <port no>
 
     # This command establishes a new TCP connection to the specified <destination> at the specified <port no>. 
     # The <destination> is the IP address of the computer. 
@@ -225,6 +226,7 @@ def handle_command(command):
         thread.start()
 
         print(f"Successfully connected to {destination}:{destination_port}")
+        
     elif user_cmd == "list":
 
         if len(connections) == 0:
