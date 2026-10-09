@@ -8,14 +8,22 @@ import sys
 connections = []  
 
 def listen_for_connect(s):
+
+    print("[DEBUG] Listening for incoming TCP connections...")
+    
     while True:
         try:
             connection_socket, address = s.accept()
         except OSError:
             break
 
+        print(f"\n[DEBUG] Connection accepted from {address}")
+        print(f"[DEBUG] Socket: {connection_socket}")
+
         # add connection to list
         connections.append({"socket": connection_socket, "address": address[0], "port": int(address[1])})
+
+        print(f"[DEBUG] Total connections: {len(connections)}")
 
         thread = threading.Thread(target=listen_to_peer, args=(connection_socket, address[0], int(address[1])), daemon=True)
         thread.start()
@@ -84,12 +92,22 @@ def listen_to_peer(sock, addr, port):
         remove_connection(sock)
         print(f"\nPeer disconnected: {addr}")
 
+
+'''
+def get_my_ip()
+----------------
+returns ip address
+'''
 def get_my_ip():
     temp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     try:
         temp.connect(("8.8.8.8", 80))
         ip = temp.getsockname()[0]
+
+    except OSError:
+        ip = "127.0.0.1"
+
     finally:
         temp.close()
 
@@ -97,8 +115,11 @@ def get_my_ip():
 
 global_my_ip = get_my_ip()
 
-#1. help command 
-# Print out list of commands to control in our terminal 
+'''
+def help_command():
+--------------------
+prints out list of commands 
+'''
 def help_command():
     print("\n" + "=" * 70)
     print("\t\t\t\tCOMMANDS")
@@ -107,53 +128,27 @@ def help_command():
     print("The following  are the commands that can be"
           " used on line text with their use case:\n")
 
-    print("help : \n\tShows all the commands.")
+    print("help : \n\tShows all the commands.") #DONE
     
-    print("myip :\n\tShows what yuour local IP is (not 127.0.0.1).")
+    print("myip :\n\tDisplay the IP address of this process.")
     
-    print("myport :\n\tShows which port is being listened to")
+    print("myport :\n\tDisplays the port on which this process is listening for incoming connections.")
     
     print("connect <destubation> <port no> :\n\t\tTries to  establishes new"
-          " TCP connection to a local IP")
+          " TCP connection to a local IP") #DONE
     
-    print("list :\n\tPrints out all connected IP address and what port each is listening to.")
+    print("list :\n\tPrints out all connected IP address and what port each is listening to.") #DONE
     
     print("terminate <connection id> :\n\t\tterminates a connection based on the ID placed on them.")
     
-    print("send <connection id> :\n\t\tSend a message to ones ID as well as a confirmation if message sent.")
+    print("send <connection id> :\n\t\tSend a message to ones ID as well as a confirmation if message sent.") #DONE
     
-    print("exit :\n\tExit from program.")
+    print("exit :\n\tExit from program.") #DONE
 
     print("\n" + "=" * 70)
 
 def myip_command():
-
-    #FOR CLEAN UP
-    #can also just call for: 
-    #print(global_my_ip)
-    
-    hostname = socket.gethostname()
-    
-    try: 
-        #list of 5 family,type,protocol,canonname, sockaddr
-        addresses = socket.getaddrinfo(hostname, None, socket.AF_INET)
-
-        
-        for address in addresses:
-            #5th give us sockaddr
-            #1st item in sockaddr is our IP
-            ip = address[4][0]
-
-            #ignore localhost address 
-            if not ip.startswith("127."):
-                print(f"Local IP: {ip}.")
-                return
-            else: 
-                print("Could not find loccal IP address." )
-
-    #error message instead of a crash
-    except socket.gaierror:
-        print("Could not find local IP address.")
+    print(global_my_ip)
     
 def handle_command(command):
     # store user input
@@ -164,11 +159,6 @@ def handle_command(command):
 
     # extract command and normalize string
     user_cmd = user_input[0].lower()
-
-    # insert all the commands here
-
-
-
 
     # connect <destination> <port no>
 
@@ -241,7 +231,6 @@ def handle_command(command):
 
         for i, peer in enumerate(connections, start=1):
             print(f"{i}: {peer['address']}\t{peer['port']}")
-
         
     elif user_cmd == "send":
 
