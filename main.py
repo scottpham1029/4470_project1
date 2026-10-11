@@ -332,7 +332,10 @@ def main():
     s = socket.socket()
 
     # bind to port
-    port = int(sys.argv[1])
+    if len(sys.argv) != 2:
+        port = int(input("Required argument: PORT NUMBER\nEnter port number: "))
+    else:
+        port = int(sys.argv[1])
 
     #allow socket addy to be reused during runtime
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
